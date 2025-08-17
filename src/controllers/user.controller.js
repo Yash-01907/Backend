@@ -1,4 +1,3 @@
-import e from "express";
 import { ApiError } from "../utlis/ApiErrors.js";
 import { asyncHandler } from "../utlis/asyncHandler.js";
 import { User } from "../models/user.model.js";
@@ -17,7 +16,6 @@ const registerUser = asyncHandler(async (req, res) => {
   //return res
 
   const { username, email, fullname, password } = req.body;
-  console.log(fullname, email, username, password);
 
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
@@ -25,7 +23,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const existedUser = User.findOne({ $or: [{ username }, { email }] });
+  const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
   if (existedUser) {
     throw new ApiError(409, "User with email or username already exists");
