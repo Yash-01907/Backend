@@ -1,24 +1,40 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+
 
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
-    //upload the file on cloudinary
+
+    // Check if file exists before uploading
+    if (!fs.existsSync(localFilePath)) {
+      console.log("File does not exist:", localFilePath);
+      return null;
+    }
+
+    console.log("Attempting to upload file:", localFilePath);
+
+    // Upload the file on cloudinary
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
-    //file has been uploaded successfully
-    console.log("File is uploaded on cloudinary ", response);
+
+    // File has been uploaded successfully
+    console.log("File is uploaded on cloudinary:", response.url);
+
+    // Clean up the local file after successful upload
+    fs.unlinkSync(localFilePath);
+
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath); //Remove the local file from the server after uploading it on cloudinary fails. Unlink ka matlab hota hai ki os se unlink ho jayega kindof delete bol le
+    console.error("Cloudinary upload error:", error);
+
+    // Remove the local file if it exists
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
     return null;
   }
 };
