@@ -38,8 +38,6 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Check for uploaded files
-  console.log("Avatar files:", req.files?.avatar);
-  console.log("Cover image files:", req.files?.coverImage);
 
   const avatarLocalPath = req.files?.avatar?.[0]?.path;
   const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
@@ -58,9 +56,6 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatar) {
     throw new ApiError(400, "Failed to upload avatar to Cloudinary");
   }
-
-  console.log("Avatar uploaded successfully:", avatar.url);
-  console.log("Cover image uploaded:", coverImage?.url);
 
   // Create user object - create entry in db
   const user = await User.create({
@@ -95,7 +90,6 @@ const loginUser = asyncHandler(async (req, res) => {
   //send tokens in cookies
 
   const { email, username, password } = req.body;
-  console.log(email, username, password);
   if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
   }
@@ -160,12 +154,12 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
-    req.cookies.refreshToken || req.bodies.refreshToken;
+    req.cookies.refreshToken || req.body.refreshToken;
   if (!incomingRefreshToken) throw new ApiError(401, "Unauthorised request");
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,
-      process.env.ACCESS_TOKEN_SECRET
+      process.env.REFRESH_TOKEN_SECRET
     );
 
     const user = await User.findById(decodedToken?._id);
@@ -183,9 +177,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
-
-    user.refreshToken = refreshToken;
-    await user.save({ validateBeforeSave: false });
 
     return res
       .status(200)
