@@ -1,8 +1,8 @@
-import { ApiError } from "../utlis/ApiErrors.js";
-import { asyncHandler } from "../utlis/asyncHandler.js";
+import { ApiError } from "../utils/ApiErrors.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utlis/cloudinary.js";
-import { ApiResponse } from "../utlis/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import { subscribe } from "diagnostics_channel";
 
@@ -133,8 +133,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
